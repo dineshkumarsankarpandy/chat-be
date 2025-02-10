@@ -57,7 +57,7 @@ IMPORTANT: Respond ONLY with a valid JSON object that has exactly the following 
 Do NOT include any markdown formatting, code fences, or extra commentary.
 `;
 
-    try {
+ 
       const response = await this.openai.chat.completions.create({
         model: 'gpt-4o-mini',
         messages: [
@@ -85,10 +85,9 @@ Do NOT include any markdown formatting, code fences, or extra commentary.
         code: parsedContent.code || {},
         otherResponse: parsedContent.otherResponse || ""
       };
-    } catch (error) {
-      console.error('Error generating code response:', error);
-      throw new Error('Failed to generate code response');
-    }
+ 
+ 
+    
   }
 }
 
