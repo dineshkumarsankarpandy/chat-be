@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Res, Req, HttpStatus } from '@nestjs/common';
 import { AgentModelService } from './agent-model.service';
-import { CreateAgentModelDto } from './dto/create-agent-model.dto';
+import { CreateAgentModelDto, GenerateCodeFromImageDto } from './dto/create-agent-model.dto';
 import { UpdateAgentModelDto } from './dto/update-agent-model.dto';
 import { Request, Response } from 'express';
 
@@ -33,4 +33,32 @@ export class AgentModelController {
 
     }
 }
+
+    @Post('generateCode-image')
+    async generateCodeForImage(
+      @Body() data:GenerateCodeFromImageDto,
+      @Res() res: Response,
+      @Req() req: Request 
+
+ ){
+
+        try{
+          const gencodeFromImg = await this.agentModelService.generateImgResponse(data.imageURL);
+          return res.status(HttpStatus.OK).json({
+            data: gencodeFromImg,
+            success: true,
+
+          })
+        }
+    catch(err){
+
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        success:false,
+        message:`something went wrong ${err}`
+      })
+
+
+    }
+  }
+
 }
