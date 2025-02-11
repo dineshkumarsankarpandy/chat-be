@@ -258,7 +258,7 @@ export class AgentModelService {
       };    
   }
 
-  async generateImgResponse(imageURL:string): Promise<StreamableFile> {
+  async generateImgResponse(imageURL:string): Promise<{ framework: string; code: any; otherResponse: string }> {
     const getDescriptionPromptText = `Describe the attached screenshot in detail. I will send what you give me to a developer to recreate the original screenshot of a website that I sent you. Please listen very carefully. It's very important for my job that you follow these instructions:
 
 - Think step by step and describe the UI in great detail.
@@ -312,20 +312,21 @@ export class AgentModelService {
       { responseType: 'stream' } as any
     );
 
-    const readableStream = new Readable({
-      objectMode: true,
-      async read() {
-        for await (const chunk of completionResponse) {
-          const content = chunk.choices[0]?.delta?.content || '';
-          this.push(content);
-        }
-        this.push(null); // End stream
-      },
-    });
+    let content = '';
+    for await (const chunk of completionResponse as any) {
+      content += chunk.choices[0]?.delta?.content || '';
+    }
+    console.log('content', content);
+    content = content.replace(/```/g, '').trim();
   
-    return new StreamableFile(readableStream);
-  }
+    const parsedContent = JSON.parse(content);
+  
+    return {
+      framework: parsedContent.framework || "",
+      code: parsedContent.code || {},
+      otherResponse: parsedContent.otherResponse || ""
+    };
   
 }
 
-
+}
