@@ -60,7 +60,12 @@ export class AgentModelService {
       return {
         framework: parsedContent.framework || "",
         code: parsedContent.code || {},
-        otherResponse: parsedContent.otherResponse || 
+        otherResponse: parsedContent.otherResponse || ''
+
+
+      
+    }
+  }
 
   async generateImgResponse(imageURL: string): Promise<{ framework: string; code: any; otherResponse: string }> {
     const getDescriptionPromptText = `Describe the attached screenshot in detail. I will send what you give me to a developer to recreate the original screenshot of a website that I sent you. Please listen very carefully. It's very important for my job that you follow these instructions:
@@ -134,8 +139,8 @@ export class AgentModelService {
 
 
 
-
+  }
   
-}
+
 
 
