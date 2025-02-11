@@ -18,14 +18,7 @@ export class AgentModelService {
 
   async generateCodeResponse(userPrompt: string): Promise<{ framework: string; code: any; otherResponse: string }> {
     const systemPrompt = `
-   You are a highly skilled React developer with extensive experience in creating dynamic and responsive web applications. 
-   You excel at writing clean, efficient, and well-structured React code while automatically incorporating necessary styles, 
-   CSS, and icons to enhance the user experience, even when not explicitly requested.
-
-  Your task is to generate a complete React application with an organized file structure. 
-  This application should include all relevant components, styles, and assets that are typically required for a modern web app.
-
-  Please ensure that the code is well-commented and that the file structure is easy to navigate for future development.
+    
 
    IMPORTANT: Respond ONLY with a valid JSON object that has exactly the following keys:
   - "Make a well designed app with the given project request"
@@ -130,29 +123,21 @@ export class AgentModelService {
 
 
 
-
-
-
-
-
-
-  async generateImgResponse(imageURL:string): Promise<StreamableFile> {
+  async generateImgResponse(imageURL: string): Promise<{ framework: string; code: any; otherResponse: string }> {
     const getDescriptionPromptText = `Describe the attached screenshot in detail. I will send what you give me to a developer to recreate the original screenshot of a website that I sent you. Please listen very carefully. It's very important for my job that you follow these instructions:
-
-- Think step by step and describe the UI in great detail.
-- Make sure to describe where everything is in the UI so the developer can recreate it and how elements are aligned.
-- Pay close attention to background color, text color, font size, font family, padding, margin, border, etc. Match the colors and sizes exactly.
-- Make sure to mention every part of the screenshot including any headers, footers, sidebars, etc.
-- Make sure to use the exact text from the screenshot.
-`;
-
-
-;
+  
+  - Think step by step and describe the UI in great detail.
+  - Make sure to describe where everything is in the UI so the developer can recreate it and how elements are aligned.
+  - Pay close attention to background color, text color, font size, font family, padding, margin, border, etc. Match the colors and sizes exactly.
+  - Make sure to mention every part of the screenshot including any headers, footers, sidebars, etc.
+  - Make sure to use the exact text from the screenshot.
+  `;
+  
     const codingPrompt = getCodingPrompt();
     const descriptionPromptContent = `${getDescriptionPromptText}\nImage: ${imageURL}`;
-
+  
     const initialResponse = await this.openai.chat.completions.create({
-      model: "gpt-3.5-turbo", // e.g., "gpt-3.5-turbo" or "gpt-4"
+      model: "gpt-3.5-turbo",
       temperature: 0.2,
       messages: [
         {
@@ -161,13 +146,13 @@ export class AgentModelService {
         },
       ],
     });
-
+  
     console.log({ initialResponse });
     const descriptionFromChatGPT = initialResponse.choices[0].message?.content;
     if (!descriptionFromChatGPT) {
       throw new BadRequestException('No description returned from ChatGPT.');
     }
-
+  
     // Second ChatGPT call: stream the generated code based on the description and coding prompt
     const completionResponse = await this.openai.chat.completions.create(
       {
@@ -189,20 +174,28 @@ export class AgentModelService {
       },
       { responseType: 'stream' } as any
     );
-
-    const readableStream = new Readable({
-      objectMode: true,
-      async read() {
-        for await (const chunk of completionResponse) {
-          const content = chunk.choices[0]?.delta?.content || '';
-          this.push(content);
-        }
-        this.push(null); // End stream
-      },
-    });
   
-    return new StreamableFile(readableStream);
+    let content = '';
+    for await (const chunk of completionResponse as any) {
+      content += chunk.choices[0]?.delta?.content || '';
+    }
+    console.log('content', content);
+    content = content.replace(/```/g, '').trim();
+  
+    const parsedContent = JSON.parse(content);
+  
+    return {
+      framework: parsedContent.framework || "",
+      code: parsedContent.code || {},
+      otherResponse: parsedContent.otherResponse || ""
+    };
   }
+  
+
+
+
+
+
   
 }
 

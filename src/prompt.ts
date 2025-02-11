@@ -76,6 +76,22 @@ ${examples
   .join("\n")}
   `;
 
+systemPrompt+= `
+
+
+  IMPORTANT: Respond ONLY with a valid JSON object that has exactly the following keys:
+  - "Make a well designed app with the given project request"
+  - "framework": a string indicating the framework (or an empty string if not applicable).
+  - "code": a JSON object representing the full folder structure of the project. In this structure, keys represent folder names or file names. For files, the value should be a string containing the file content. For folders, the value should be another JSON object following the same rules. For example, if the framework is React, include a "package.json", a "src" folder with necessary files (like "index.js" or "App.js"), and a "public" folder with "index.html". If a different framework is requested, output a complete and relevant file/folder structure.
+  - "otherResponse": a string containing any additional responses or questions.
+   Do NOT include any markdown formatting, code fences, or extra commentary.
+
+
+
+
+`
+
+
   return dedent(systemPrompt);
 
 
