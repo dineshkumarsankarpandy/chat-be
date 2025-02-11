@@ -27,15 +27,14 @@ export class AgentModelService {
     - If you use any imports from React like useState or useEffect, make sure to import them directly
     - Use TypeScript as the language for the React component
     - Use Tailwind classes for styling. DO NOT USE ARBITRARY VALUES (e.g. \`h-[600px]\`). Make sure to use a consistent color palette.
-    - Use margin and padding to style the components and ensure the components are spaced out nicely
-
-          IMPORTANT: Respond ONLY with a valid JSON object that has exactly the following keys:
-            - "Make a well designed app with the given project request"
-            - "framework": a string indicating the framework (or an empty string if not applicable).
-          - "code": a JSON object representing the full folder structure of the project. In this structure, keys represent folder names or file names. For files, the value should be a string containing the file content. For folders, the value should be another JSON object following the same rules. For example, if the framework is React, include a "package.json", a "src" folder with necessary files (like "index.js" or "App.js"), and a "public" folder with "index.html". If a different framework is requested, output a complete and relevant file/folder structure.
-          - "otherResponse": a string containing any additional responses or questions.
-          Do NOT include any markdown formatting, code fences, or extra commentary.
-          `;  
+    - Use margin and padding to style the components and ensure the components are spaced out nicely   
+   IMPORTANT: Respond ONLY with a valid JSON object that has exactly the following keys:
+  - "Make a well designed app with the given project request"
+  - "framework": a string indicating the framework (or an empty string if not applicable).
+  - "code": a JSON object representing the full folder structure of the project. In this structure, keys represent folder names or file names. For files, the value should be a string containing the file content. For folders, the value should be another JSON object following the same rules. For example, if the framework is React, include a "package.json", a "src" folder with necessary files (like "index.js" or "App.js"), and a "public" folder with "index.html". If a different framework is requested, output a complete and relevant file/folder structure.
+  - "otherResponse": a string containing any additional responses or questions.
+   Do NOT include any markdown formatting, code fences, or extra commentary.
+    `;
       const response = await this.openai.chat.completions.create({
         model: 'gpt-4o-mini',
         messages: [
@@ -61,27 +60,23 @@ export class AgentModelService {
       return {
         framework: parsedContent.framework || "",
         code: parsedContent.code || {},
-        otherResponse: parsedContent.otherResponse || ""
-      };    
-  }
+        otherResponse: parsedContent.otherResponse || 
 
-  async generateImgResponse(imageURL:string): Promise<StreamableFile> {
+  async generateImgResponse(imageURL: string): Promise<{ framework: string; code: any; otherResponse: string }> {
     const getDescriptionPromptText = `Describe the attached screenshot in detail. I will send what you give me to a developer to recreate the original screenshot of a website that I sent you. Please listen very carefully. It's very important for my job that you follow these instructions:
-
-- Think step by step and describe the UI in great detail.
-- Make sure to describe where everything is in the UI so the developer can recreate it and how elements are aligned.
-- Pay close attention to background color, text color, font size, font family, padding, margin, border, etc. Match the colors and sizes exactly.
-- Make sure to mention every part of the screenshot including any headers, footers, sidebars, etc.
-- Make sure to use the exact text from the screenshot.
-`;
-
-
-;
+  
+  - Think step by step and describe the UI in great detail.
+  - Make sure to describe where everything is in the UI so the developer can recreate it and how elements are aligned.
+  - Pay close attention to background color, text color, font size, font family, padding, margin, border, etc. Match the colors and sizes exactly.
+  - Make sure to mention every part of the screenshot including any headers, footers, sidebars, etc.
+  - Make sure to use the exact text from the screenshot.
+  `;
+  
     const codingPrompt = getCodingPrompt();
     const descriptionPromptContent = `${getDescriptionPromptText}\nImage: ${imageURL}`;
-
+  
     const initialResponse = await this.openai.chat.completions.create({
-      model: "gpt-3.5-turbo", // e.g., "gpt-3.5-turbo" or "gpt-4"
+      model: "gpt-3.5-turbo",
       temperature: 0.2,
       messages: [
         {
@@ -90,13 +85,13 @@ export class AgentModelService {
         },
       ],
     });
-
+  
     console.log({ initialResponse });
     const descriptionFromChatGPT = initialResponse.choices[0].message?.content;
     if (!descriptionFromChatGPT) {
       throw new BadRequestException('No description returned from ChatGPT.');
     }
-
+  
     // Second ChatGPT call: stream the generated code based on the description and coding prompt
     const completionResponse = await this.openai.chat.completions.create(
       {
@@ -118,20 +113,28 @@ export class AgentModelService {
       },
       { responseType: 'stream' } as any
     );
-
-    const readableStream = new Readable({
-      objectMode: true,
-      async read() {
-        for await (const chunk of completionResponse) {
-          const content = chunk.choices[0]?.delta?.content || '';
-          this.push(content);
-        }
-        this.push(null); // End stream
-      },
-    });
   
-    return new StreamableFile(readableStream);
+    let content = '';
+    for await (const chunk of completionResponse as any) {
+      content += chunk.choices[0]?.delta?.content || '';
+    }
+    console.log('content', content);
+    content = content.replace(/```/g, '').trim();
+  
+    const parsedContent = JSON.parse(content);
+  
+    return {
+      framework: parsedContent.framework || "",
+      code: parsedContent.code || {},
+      otherResponse: parsedContent.otherResponse || ""
+    };
   }
+  
+
+
+
+
+
   
 }
 
