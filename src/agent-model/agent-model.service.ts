@@ -2,6 +2,8 @@ import { BadRequestException, Injectable, StreamableFile } from '@nestjs/common'
 import OpenAI from 'openai';
 import { getCodingPrompt } from 'src/prompt';
 import { Readable } from 'stream';
+import {z} from "zod";
+import {zodResponseFormat} from "openai/helpers/zod"
 
 @Injectable()
 export class AgentModelService {
@@ -12,6 +14,13 @@ export class AgentModelService {
       apiKey: process.env.OPENAI_API_KEY,
     });
   }
+
+  public generateCode = z.object({
+    framework: z.string(),
+    code: z.string(),
+    otherResponse: z.string()
+  }) 
+  .strict()
 
   async generateCodeResponse(userPrompt: string): Promise<{ framework: string; code: any; otherResponse: string }> {
     const systemPrompt = `
@@ -35,7 +44,7 @@ export class AgentModelService {
   - "otherResponse": a string containing any additional responses or questions.
    Do NOT include any markdown formatting, code fences, or extra commentary.
     `;
-      const response = await this.openai.chat.completions.create({
+      const response = await this.openai.beta.chat.completions.parse({
         model: 'gpt-4o-mini',
         messages: [
           {
@@ -49,25 +58,32 @@ export class AgentModelService {
         ],
         max_tokens: 1200,
         temperature: 0.0,
+        response_format: zodResponseFormat(this.generateCode,"output_schema for code g")
       });
 
-      let content = response.choices[0].message.content;
-      console.log('content',content);
-      content = content.replace(/```/g, '').trim();
-      
-      const parsedContent = JSON.parse(content);
+      let content = response.choices[0].message.parsed;
+   
 
       return {
-        framework: parsedContent.framework || "",
-        code: parsedContent.code || {},
-        otherResponse: parsedContent.otherResponse || ''
-
-
-      
+       
+      framework: content.framework,
+      code:content.code,
+      otherResponse:content.otherResponse
     }
   }
 
-  async generateImgResponse(imageURL: string): Promise<{ framework: string; code: any; otherResponse: string }> {
+
+
+  public generateCodeForImage = z.object({
+    code: z.string(),
+    otherResponse: z.string()
+  }) 
+  .strict()
+
+
+
+
+  async generateImgResponse(imageURL: string): Promise<{ code: any; otherResponse: string }> {
     const getDescriptionPromptText = `Describe the attached screenshot in detail. I will send what you give me to a developer to recreate the original screenshot of a website that I sent you. Please listen very carefully. It's very important for my job that you follow these instructions:
   
   - Think step by step and describe the UI in great detail.
@@ -98,7 +114,7 @@ export class AgentModelService {
     }
   
     // Second ChatGPT call: stream the generated code based on the description and coding prompt
-    const completionResponse = await this.openai.chat.completions.create(
+    const completionResponse = await this.openai.beta.chat.completions.parse(
       {
         model: "gpt-4o-mini",
         messages: [
@@ -113,30 +129,20 @@ export class AgentModelService {
               "\nPlease ONLY return code, NO backticks or language names.",
           },
         ],
-        stream: true,
         temperature: 0.2,
+        response_format: zodResponseFormat(this.generateCodeForImage, "json schema for generating code from given image")
       },
-      { responseType: 'stream' } as any
+    
     );
   
-    let content = '';
-    for await (const chunk of completionResponse as any) {
-      content += chunk.choices[0]?.delta?.content || '';
-    }
-    console.log('content', content);
-    content = content.replace(/```/g, '').trim();
+    let content = completionResponse.choices[0].message.parsed;
   
-    const parsedContent = JSON.parse(content);
   
     return {
-      framework: parsedContent.framework || "",
-      code: parsedContent.code || {},
-      otherResponse: parsedContent.otherResponse || ""
+      code: content.code || {},
+      otherResponse: content.otherResponse || ""
     };
   }
-  
-
-
 
 
   }
