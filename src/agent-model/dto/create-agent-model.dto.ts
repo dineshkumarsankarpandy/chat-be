@@ -10,3 +10,11 @@ export class CreateAgentModelDto {
     @IsNotEmpty() 
     prompt: string;
 }
+
+
+export class GenerateCodeFromImageDto{
+    @ApiProperty()
+    @IsString()
+    @IsNotEmpty()
+    imageURL : string
+}
