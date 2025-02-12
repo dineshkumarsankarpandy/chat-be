@@ -30,6 +30,24 @@ export const codingPrompt = `
       <Title>Styling with Tailwind CSS</Title>
       <Description>Use Tailwind CSS for styling, ensuring a clean, elegant, and responsive UI that must supports in every screen size(better use vh for defining size).</Description>
       <Description>Stick to predefined Tailwind classes for consistency; avoid arbitrary values (e.g., h-[600px]).</Description>
+      <code-example>
+        <tailwind-import>
+            <!doctype html>
+            <html>
+              <head>
+                <meta charset="UTF-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+              </head>
+              <body>
+                <h1 class="text-3xl font-bold underline">
+                  Hello world!
+                </h1>
+              </body>
+            </html>
+          -make sure importting tailwindCSS cdn link in html file to support tailwindCSS
+        </tailwind-import>
+      </code-example
     </Guideline>
 
     <Guideline>
