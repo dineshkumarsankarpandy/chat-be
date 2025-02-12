@@ -42,7 +42,9 @@ export class AgentModelService {
   }).strict();
 
   async generateCodeResponse(userPrompt: string): Promise<{ framework: string; code: any; otherResponse: string }> {
+    try{
     const systemPrompt = codingPrompt;
+
       const response = await this.openai.chat.completions.create({
         model: 'gpt-4o-mini',
         messages: [
@@ -69,6 +71,10 @@ export class AgentModelService {
       code: ontent.code,
       otherResponse: ontent.otherResponse,
     };
+  }
+  catch(err){
+    console.error(err,"--------------------")
+  }
   }
 
   async generateImgResponse(imageURL: string): Promise<{ code: any; otherResponse: string }> {
