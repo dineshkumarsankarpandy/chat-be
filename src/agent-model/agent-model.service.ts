@@ -1,6 +1,8 @@
 import { BadRequestException, Injectable, StreamableFile } from '@nestjs/common';
 import OpenAI from 'openai';
 import { getCodingPrompt } from 'src/prompt';
+import { codingPrompt } from 'src/prompt/codingPrompt';
+
 import { Readable } from 'stream';
 import { z } from "zod";
 import { zodResponseFormat } from "openai/helpers/zod";
@@ -40,63 +42,28 @@ export class AgentModelService {
   }).strict();
 
   async generateCodeResponse(userPrompt: string): Promise<{ framework: string; code: any; otherResponse: string }> {
-    const systemPrompt = `
-      You are an expert frontend React developer operating in a sandpack environment. You will be given a description of a website from the user, and then you will return code for it using React and tailwindCSS. Follow the instructions carefully, it is very important for my job.
-      - Think carefully step by step about how to create the UI for the feature described in the prompt.
-      - Create a React component for whatever the user asked you to create and make sure it can run by itself by using a default export.
-      - Feel free to have multiple components in the file, but make sure to have one main component that uses all the other components.
-      - Make sure the website looks exactly like the feature described in the prompt.
-      - Pay close attention and Use TailwindCSS classes to background color, text color, font size, font family, padding, margin, border, etc. Match the colors and sizes exactly.
+    const systemPrompt = codingPrompt;
+      const response = await this.openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt,
+          },
+          {
+            role: 'user',
+            content: userPrompt,
+          },
+        ],
+        max_tokens: 1200,
+        temperature: 0.0,
+      });
 
-        <tailwind-import>
-
-            <!doctype html>
-        <html>
-          <head>
-            <meta charset="UTF-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-            <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
-          </head>
-          <body>
-            <h1 class="text-3xl font-bold underline">
-              Hello world!
-            </h1>
-          </body>
-        </html>
-
-
-    -make sure importting tailwindCSS cdn link in html file to support tailwindCSS
-
-        </tailwind-import>
-      - Make sure to code every part of the description to style  multiple components.
-      - Make sure to code a web site to be responsive for all screens
+      let content = response.choices[0].message.content;
+      console.log('content',content);
+      content = content.replace(/```/g, '').trim();
       
-      - For all images, please use an SVG with a white, gray, or black background and don't try to import them locally or from the internet.
-      - Make sure the React app is interactive and functional by creating state when needed and having no required props.
-      - If you use any imports from React like useState or useEffect, make sure to import them directly.
-      - Use TypeScript as the language for the React component.
-      -  DO NOT USE ARBITRARY VALUES (e.g. \`h-[600px]\`). Make sure to use a consistent color palette.
-      - Use margin and padding to style the components and ensure the components are spaced out nicely.
-      IMPORTANT: Respond ONLY with a valid JSON object that has exactly the following keys:
-      - "framework": a string indicating the framework (or an empty string if not applicable).
-      - "code": a JSON object representing the full folder structure of the project. In this structure, keys represent folder names or file names. For files, the value should be a string containing the file content. For folders, the value should be another JSON object following the same rules. For example, if the framework is React, include a "package.json", a "src" folder with necessary files (like "index.js" or "App.js"), and a "public" folder with "index.html". If a different framework is requested, output a complete and relevant file/folder structure.
-      - "otherResponse": a string containing any additional responses or questions.
-      Do NOT include any markdown formatting, code fences, or extra commentary.
-    `;
-    // const codingPrompt = getCodingPrompt();
-    const response = await this.openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ],
-      // max_tokens: 1200,
-      temperature: 0.2,
-      // response_format: zodResponseFormat(this.generateCode,'generate-code')
-    });
-
-   let content = response.choices[0].message.content
-
+      const parsedContent = JSON.parse(content);
    const fixedRaw = content.replace(/(\r\n|\n|\r)/gm, " ");
 
    let ontent = JSON.parse(fixedRaw);
@@ -122,7 +89,7 @@ export class AgentModelService {
     const descriptionPromptContent = `${getDescriptionPromptText}\nImage: ${imageURL}`;
 
     const initialResponse = await this.openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-3.5-turbo", // e.g., "gpt-3.5-turbo" or "gpt-4"
       temperature: 0.2,
       messages: [
         { role: "user", content: descriptionPromptContent },
