@@ -4,6 +4,7 @@ import { getCodingPrompt } from 'src/prompt';
 import { Readable } from 'stream';
 import { z } from "zod";
 import { zodResponseFormat } from "openai/helpers/zod";
+import shadcnDocs from 'src/lib/shadcn-docs';
 
 @Injectable()
 export class AgentModelService {
@@ -40,13 +41,36 @@ export class AgentModelService {
 
   async generateCodeResponse(userPrompt: string): Promise<{ framework: string; code: any; otherResponse: string }> {
     const systemPrompt = `
-      You are an expert frontend React developer operating in a sandpack environment. You will be given a description of a website from the user, and then you will return code for it using React. Follow the instructions carefully, it is very important for my job.
+      You are an expert frontend React developer operating in a sandpack environment. You will be given a description of a website from the user, and then you will return code for it using React and tailwindCSS. Follow the instructions carefully, it is very important for my job.
       - Think carefully step by step about how to create the UI for the feature described in the prompt.
       - Create a React component for whatever the user asked you to create and make sure it can run by itself by using a default export.
       - Feel free to have multiple components in the file, but make sure to have one main component that uses all the other components.
       - Make sure the website looks exactly like the feature described in the prompt.
-      - Pay close attention to background color, text color, font size, font family, padding, margin, border, etc. Match the colors and sizes exactly.
-      - Make sure to code every part of the description including any headers, footers, etc.
+      - Pay close attention and Use TailwindCSS classes to background color, text color, font size, font family, padding, margin, border, etc. Match the colors and sizes exactly.
+
+        <tailwind-import>
+
+            <!doctype html>
+        <html>
+          <head>
+            <meta charset="UTF-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+          </head>
+          <body>
+            <h1 class="text-3xl font-bold underline">
+              Hello world!
+            </h1>
+          </body>
+        </html>
+
+
+    -make sure importting tailwindCSS cdn link in html file to support tailwindCSS
+
+        </tailwind-import>
+      - Make sure to code every part of the description to style  multiple components.
+      - Make sure to code a web site to be responsive for all screens
+      
       - For all images, please use an SVG with a white, gray, or black background and don't try to import them locally or from the internet.
       - Make sure the React app is interactive and functional by creating state when needed and having no required props.
       - If you use any imports from React like useState or useEffect, make sure to import them directly.
@@ -59,40 +83,28 @@ export class AgentModelService {
       - "otherResponse": a string containing any additional responses or questions.
       Do NOT include any markdown formatting, code fences, or extra commentary.
     `;
-
-    const response = await this.openai.beta.chat.completions.parse({
+    // const codingPrompt = getCodingPrompt();
+    const response = await this.openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
       ],
-      max_tokens: 1200,
-      temperature: 0.0,
-      response_format: zodResponseFormat(this.generateCode,'generate-code')
+      // max_tokens: 1200,
+      temperature: 0.2,
+      // response_format: zodResponseFormat(this.generateCode,'generate-code')
     });
 
-   let content = response.choices[0].message.parsed;
+   let content = response.choices[0].message.content
 
-    // try {
-    //   content = JSON.parse(content.code);
-    // } catch (e) {
-    //   const fixedRaw = content.code.replace(/(\r\n|\n|\r)/gm, " ");
-    //   try {
-    //     content = JSON.parse(fixedRaw);
-    //   } catch (err) {
-    //     throw new BadRequestException(`Failed to parse JSON output. Original error: ${err}`);
-    //   }
-    // }
+   const fixedRaw = content.replace(/(\r\n|\n|\r)/gm, " ");
 
-    // // If the code property is a string, remove newline characters.
-    // if (typeof content.code === 'string') {
-    //   content.code = content.code.split("\n").join("");
-    // }
-    
+   let ontent = JSON.parse(fixedRaw);
+   
     return {
-      framework: content.framework,
-      code: content.code,
-      otherResponse: content.otherResponse,
+      framework: ontent.framework,
+      code: ontent.code,
+      otherResponse: ontent.otherResponse,
     };
   }
 
