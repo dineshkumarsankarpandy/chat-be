@@ -60,13 +60,9 @@ export class AgentModelService {
       });
 
       let content = response.choices[0].message.content;
-      console.log('content',content);
-      content = content.replace(/```/g, '').trim();
-      
-      const parsedContent = JSON.parse(content);
-   const fixedRaw = content.replace(/(\r\n|\n|\r)/gm, " ");
+      const fixedRaw = content.replace(/(\r\n|\n|\r)/gm, " ");
 
-   let ontent = JSON.parse(fixedRaw);
+      let ontent = JSON.parse(fixedRaw);
    
     return {
       framework: ontent.framework,
