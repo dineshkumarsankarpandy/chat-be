@@ -18,7 +18,9 @@ export class AgentModelController {
   
   ) {
         try{       
-        const generatedCode = await this.agentModelService.generateCodeResponse(data.prompt);
+        const generatedCode = await this.agentModelService.generateCodeResponse(data);
+        console.log(generatedCode,'RESPONSE DATA');
+
         return res.status(HttpStatus.OK).json({
           data: generatedCode,
           success:true
@@ -44,6 +46,8 @@ export class AgentModelController {
 
         try{
           const gencodeFromImg = await this.agentModelService.generateImgResponse(data.imageURL);
+          console.log('```````````````````````````````````````');
+          
           return res.status(HttpStatus.OK).json({
             data: gencodeFromImg,
             success: true,
