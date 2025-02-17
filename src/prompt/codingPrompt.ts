@@ -24,12 +24,6 @@ By default, this template supports JSX syntax with **Tailwind CSS classes**, Rea
 - Create **multiple sections** when designing a website, ensuring smooth navigation and a well-structured layout.
 - Use this placeholders from "https://placehold.co/{WXH}" where "W" and "H" represent the required dimensions in pixels (e.g., "600x400").
 - Ensure a **responsive design** that works flawlessly on all devices, including desktops, tablets, and mobile screens.
-- for text animation use GSAP. the GSAP library is available to be imported, 
-  e.g. \`import { gsap } from "gsap";
-      import { useGSAP } from "@gsap/react";
-      gsap.registerPlugin(useGSAP);\` 
-  
-
 
 ---
 
