@@ -8,6 +8,7 @@ import { zodResponseFormat } from "openai/helpers/zod";
 import { CreateAgentModelDto } from './dto/create-agent-model.dto';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { HelperService } from 'src/core/helper/helper.service';
+import { log } from 'util';
 
 
 @Injectable()
@@ -77,6 +78,36 @@ export class AgentModelService {
 
   async generateCodeResponse(data: CreateAgentModelDto) {
     try {
+      let promptDescOutput= null
+      let getPromptDescription = `
+### **Frontend UI & Layout Requirement Assistant**  
+
+#### **<OBJECTIVE_AND_PERSONA>**  
+You are a **Frontend UI/UX Specialist Assistant**. Your task is to understand the ${data.prompt} and generate a **Frontend Layout & UI Specification Document**, detailing the website’s structure, page components, and UI styling.
+
+---
+
+### **<INSTRUCTIONS>**  
+To complete the task, follow these steps:  
+1. **Understand Page Structure** – Identify the key pages and their purpose.  
+2. **Define Layout & Information Hierarchy** – Organize content sections logically.  
+3. **Specify UI Components & Interactions** – Define buttons, cards, modals, etc.  
+4. **Create a User Flow Diagram** – Show how users navigate through the site.  
+5. **Provide a Design Brief** – Specify styles, colors, typography, and spacing.  
+6. **Ensure Responsiveness** – Define how the layout adapts for desktop, tablet, and mobile views.  
+7. **Charts** - Suggest to use recharts library
+      
+      `;
+
+      const modelDescription  = this.genAI.getGenerativeModel({model:process.env.GEMINI_MODEL_THINK})
+      const promptDesctiption = await modelDescription.generateContent([
+        getPromptDescription
+      ])
+      promptDescOutput = promptDesctiption.response.text();
+
+
+
+      
       const systemPrompt = codingPrompt;
       let getDescriptionPrompt = `Describe the attached screenshot in detail. I will send what you give me to a developer to recreate the original screenshot of a website that I sent you. Please listen very carefully. It's very important for my job that you follow these instructions:
 
@@ -91,24 +122,28 @@ export class AgentModelService {
 
       if (data.imageURl) {
         const base64Image = this.helperService.processBase64(data.imageURl);
-          const model = this.genAI.getGenerativeModel({model:process.env.GEMINI_MODEL})
+          const model = this.genAI.getGenerativeModel({model:process.env.GEMINI_MODEL_THINK})
           const imgDescription = await model.generateContent([
             getDescriptionPrompt,
             {inlineData:{data:base64Image,mimeType:'image/jpeg'}}
           ])
           descpOutput = imgDescription.response.text();
+          console.log('OUTPUT FROM GEMINI ---------');
+          
+          console.log(descpOutput);
+          
 
       } 
 
 
       const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
         { role: 'system', content: systemPrompt },
-        { role: 'user', content: data.prompt },
+        { role: 'user', content: promptDescOutput  },
       ];
 
 
-      if (descpOutput) {
-        messages.push({ role: 'assistant', content: descpOutput });
+      if (data.imageURl) {
+        messages.push({ role: 'assistant', content: data.imageURl });
       }
 
       const response = await this.openai.chat.completions.create({
