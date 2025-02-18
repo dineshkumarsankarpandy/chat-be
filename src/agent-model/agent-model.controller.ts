@@ -18,7 +18,7 @@ export class AgentModelController {
   
   ) {
         try{       
-        const generatedCode = await this.agentModelService.generateCodeResponse(data);
+        const generatedCode = await this.agentModelService.generatedAgenticResponse(data);
         console.log(generatedCode,'RESPONSE DATA');
 
         return res.status(HttpStatus.OK).json({

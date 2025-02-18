@@ -27,5 +27,9 @@ export class HelperService {
       let cleanedCode = code.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
       return cleanedCode;
     }
+
+    public isAgentError(response: any): response is { error: string } {
+      return typeof response === "object" && response !== null && "error" in response;
+    }
   
 }
