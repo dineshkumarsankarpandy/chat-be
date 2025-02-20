@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, StreamableFile } from '@nestjs/common';
 import OpenAI from 'openai';
 import { getCodingPrompt } from 'src/prompt';
-import { codingPrompt } from 'src/prompt/codingPrompt';
+import { codingPrompt, systemPrompt } from 'src/prompt/codingPrompt';
 import { stripIndents } from 'src/stirpend';
 import { z } from "zod";
 import { zodResponseFormat } from "openai/helpers/zod";
@@ -9,7 +9,7 @@ import { CreateAgentModelDto } from './dto/create-agent-model.dto';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { HelperService } from 'src/core/helper/helper.service';
 import { log } from 'util';
-import { codeGenerationAgent, componentStrucutreAgent, dataGenerationAgent, userComponentSelectionAgent, userRequirementAgent } from 'src/prompt/agentsPrompts';
+import { codeGenerationAgent, pageStructurePrompt,  userComponentSelectionAgent,  uiRequirementAgent, componentStrucutreAgent } from 'src/prompt/agentsPrompts';
 import { json } from 'express';
 
 
@@ -200,7 +200,8 @@ export class AgentModelService {
     
     agentPrompt: string,
     userInput?: string | object,
-    model: string = "gpt-4o-mini"
+    model: string = "o3-mini-2025-01-31",
+    systemPromptAddition?: string
   ): Promise<string> {
     try {
       const userInputStr = typeof userInput === "object" ? JSON.stringify(userInput) : userInput;
@@ -212,9 +213,7 @@ export class AgentModelService {
       const completion = await this.openai.chat.completions.create({
         model,
         messages,
-        response_format: { type: "json_object" },
-        temperature: 0.2,
-        max_tokens:10000
+        response_format: { type: "json_object" }
       });
 
       const response = completion.choices[0].message.content;
@@ -392,89 +391,223 @@ export class AgentModelService {
 
  
 
+// async generatedAgenticResponse(data: CreateAgentModelDto){
+
+// try{
+
+
+    
+
+//   const uiRequirementsJson = await this.runAgent(
+//     "User Interface Requirements Agent",
+//     userRequirementAgent,
+//     data.prompt
+//   );
+
+//   if (this.helperService.isAgentError(uiRequirementsJson)) {
+//     return JSON.stringify({ error: `User Interface Requirements Agent failed: ${uiRequirementsJson.error}` });
+//   }
+
+//   console.log(uiRequirementsJson, "UIREQUIREMENTS");
+  
+
+//   const uiComponentMappingJson = await this.runAgent(
+//     "UI Components Selection Agent",
+//     userComponentSelectionAgent,
+//     uiRequirementsJson
+//   );
+//   console.log(uiComponentMappingJson, "UI CONPONENT REQUIREMENTS");
+
+//   if (this.helperService.isAgentError(uiComponentMappingJson)) {
+//     return JSON.stringify({ error: `User Components Selection Agent failed: ${uiComponentMappingJson.error}` });
+//   }
+
+//   const componentStrucutredJson = await this.runAgent(
+//     "Components Structure Agent",
+//     componentStrucutreAgent,
+//     uiComponentMappingJson
+//   );
+//   console.log(componentStrucutredJson, "component structure json");
+
+
+//   if (this.helperService.isAgentError(componentStrucutredJson)) {
+//     return JSON.stringify({ error: `UI Components structured Agent failed: ${componentStrucutredJson.error}` });
+//   }
+
+//   // const dataGenerationJson = await this.runAgent(
+//   //   "Data Generation Agent Prompt",
+//   //   dataGenerationAgent,
+//   //   componentStrucutredJson
+//   // );
+//   // console.log(dataGenerationJson, "Data Generation Agent Prompt");
+
+
+//   // if (this.helperService.isAgentError(dataGenerationJson)) {
+//   //   return JSON.stringify({ error: `UI Components structured Agent failed: ${dataGenerationJson.error}` });
+//   // }
+
+
+//   const generatedCodeJson = await this.runAgent(
+//     "Code Generation Agent",
+//     codeGenerationAgent,
+//     {componentStrucutredJson,uiComponentMappingJson},
+//     systemPrompt
+//   );
+ 
+//   if (this.helperService.isAgentError(generatedCodeJson)) {
+//     return JSON.stringify({ error: ` Code Generating Agent failed: ${generatedCodeJson.error}` });
+//   }
+
+
+// const parsedContent = JSON.parse(generatedCodeJson)
+
+
+//   return {
+//     uiRequirementsJson: uiRequirementsJson,
+//     uiComponentMappingJson: uiComponentMappingJson,
+//     componentStrucutredJson: componentStrucutredJson,
+//     code: parsedContent.code,
+//     otherResponse: parsedContent.otherResponse,
+    
+//   };
+// }
+// catch(err){
+//   console.log(err, "ERROR");
+  
+// }
+
+// }
+
 async generatedAgenticResponse(data: CreateAgentModelDto){
 
-try{
-  const uiRequirementsJson = await this.runAgent(
-    "User Interface Requirements Agent",
-    userRequirementAgent,
-    data.prompt
-  );
+  try{
 
-  if (this.helperService.isAgentError(uiRequirementsJson)) {
-    return JSON.stringify({ error: `User Interface Requirements Agent failed: ${uiRequirementsJson.error}` });
-  }
+    const RequirementsUnderstandJson = await this.runAgent(
+      "User Interface Requirements Agent",
+      uiRequirementAgent,
+      data.prompt,
+      "gpt-4o-mini",
+    );
 
-  console.log(uiRequirementsJson, "UIREQUIREMENTS");
-  
+    if (this.helperService.isAgentError(RequirementsUnderstandJson)) {
+      return JSON.stringify({ error: `User Interface Requirements Agent failed: ${RequirementsUnderstandJson.error}` });
+    }
 
-  const uiComponentMappingJson = await this.runAgent(
-    "UI Components Selection Agent",
-    userComponentSelectionAgent,
-    uiRequirementsJson
-  );
-  console.log(uiComponentMappingJson, "UI CONPONENT REQUIREMENTS");
-
-  if (this.helperService.isAgentError(uiComponentMappingJson)) {
-    return JSON.stringify({ error: `User Components Selection Agent failed: ${uiComponentMappingJson.error}` });
-  }
-
-  const componentStrucutredJson = await this.runAgent(
-    "Components Structure Agent",
-    componentStrucutreAgent,
-    uiComponentMappingJson
-  );
-  console.log(componentStrucutredJson, "component structure json");
+    console.log(RequirementsUnderstandJson, "UIREQUIREMENTS");
 
 
-  if (this.helperService.isAgentError(componentStrucutredJson)) {
-    return JSON.stringify({ error: `UI Components structured Agent failed: ${componentStrucutredJson.error}` });
-  }
 
-  // const dataGenerationJson = await this.runAgent(
-  //   "Data Generation Agent Prompt",
-  //   dataGenerationAgent,
-  //   componentStrucutredJson
-  // );
-  // console.log(dataGenerationJson, "Data Generation Agent Prompt");
+    //   const pageStructureanalysis = await this.runAgent(
+    //   "UI Components Selection Agent",
+    //   pageStructurePrompt,
+    //   RequirementsUnderstandJson,
+    //   "gpt-4o-mini",
+    // );
+    // console.log(pageStructureanalysis, "UI CONPONENT REQUIREMENTS");
 
-
-  // if (this.helperService.isAgentError(dataGenerationJson)) {
-  //   return JSON.stringify({ error: `UI Components structured Agent failed: ${dataGenerationJson.error}` });
-  // }
+    // if (this.helperService.isAgentError(pageStructureanalysis)) {
+    //   return JSON.stringify({ error: `User Components Selection Agent failed: ${pageStructureanalysis.error}` });
+    // }
 
 
-  const generatedCodeJson = await this.runAgent(
-    "Code Generation Agent",
-    codeGenerationAgent,
-    {componentStrucutredJson,uiComponentMappingJson}
-  );
- 
-  if (this.helperService.isAgentError(generatedCodeJson)) {
-    return JSON.stringify({ error: ` Code Generating Agent failed: ${generatedCodeJson.error}` });
-  }
 
 
-const parsedContent = JSON.parse(generatedCodeJson)
+     const uiComponentSelectionJson = await this.runAgent(
+      "UI Components Selection Agent",
+      userComponentSelectionAgent,
+      RequirementsUnderstandJson
+    );
+    console.log(uiComponentSelectionJson, "UI CONPONENT REQUIREMENTS");
+
+    if (this.helperService.isAgentError(uiComponentSelectionJson)) {
+      return JSON.stringify({ error: `User Components Selection Agent failed: ${uiComponentSelectionJson.error}` });
+    }
 
 
-  return {
-    uiRequirementsJson: uiRequirementsJson,
-    uiComponentMappingJson: uiComponentMappingJson,
-    componentStrucutredJson: componentStrucutredJson,
-    code: parsedContent.code,
-    otherResponse: parsedContent.otherResponse,
+
+      const componentStrucutredJson = await this.runAgent(
+      "Components Structure Agent",
+      componentStrucutreAgent,
+      uiComponentSelectionJson
+    );
+    console.log(componentStrucutredJson, "component structure json");
+
+     if (this.helperService.isAgentError(componentStrucutredJson)) {
+      return JSON.stringify({ error: `UI Components structured Agent failed: ${componentStrucutredJson.error}` });
+    }
+
+
+      const generatedCodeJson = await this.runAgent(
+      "Code Generation Agent",
+      codeGenerationAgent,
+      {componentStrucutredJson,uiComponentSelectionJson},
+      
+    );
+
+    if (this.helperService.isAgentError(generatedCodeJson)) {
+      return JSON.stringify({ error: ` Code Generating Agent failed: ${generatedCodeJson.error}` });
+    }
+
+
+    const parsedContent = JSON.parse(generatedCodeJson)
+
     
-  };
-}
-catch(err){
-  console.log(err, "ERROR");
-  
-}
-
-}
 
 
+    // const uiComponentMappingJson = await this.runAgent(
+    //   "UI Components Selection Agent",
+    //   userComponentSelectionAgent,
+    //   uiRequirementsJson,
+    //   "gpt-4o-mini",
+    //   systemPrompt // Pass the systemPrompt here
+    // );
+    // console.log(uiComponentMappingJson, "UI CONPONENT REQUIREMENTS");
+
+    // if (this.helperService.isAgentError(uiComponentMappingJson)) {
+    //   return JSON.stringify({ error: `User Components Selection Agent failed: ${uiComponentMappingJson.error}` });
+    // }
+
+    // const componentStrucutredJson = await this.runAgent(
+    //   "Components Structure Agent",
+    //   componentStrucutreAgent,
+    //   uiComponentMappingJson,
+    //   "gpt-4o-mini",
+    //   systemPrompt  // Pass the systemPrompt here
+    // );
+    // console.log(componentStrucutredJson, "component structure json");
+
+
+    // if (this.helperService.isAgentError(componentStrucutredJson)) {
+    //   return JSON.stringify({ error: `UI Components structured Agent failed: ${componentStrucutredJson.error}` });
+    // }
+
+    // const generatedCodeJson = await this.runAgent(
+    //   "Code Generation Agent",
+    //   codeGenerationAgent,
+    //   {componentStrucutredJson,uiComponentMappingJson},
+    //   "gpt-4o-mini",
+    //   systemPrompt  // Pass the systemPrompt here
+    // );
+
+    // if (this.helperService.isAgentError(generatedCodeJson)) {
+    //   return JSON.stringify({ error: ` Code Generating Agent failed: ${generatedCodeJson.error}` });
+    // }
+
+
+    // const parsedContent = JSON.parse(generatedCodeJson)
+
+
+    return {
+      code : parsedContent.code,
+      otherResponse : parsedContent.otherResponse
+    };
+  }
+  catch(err){
+    console.log(err, "ERROR");
+
+  }
+
+}
 
 
 
