@@ -28,42 +28,6 @@ You are a Description Agent, skilled in summarizing and breaking down complex re
 
 7. **Output Format:** Output a single string containing a Summary, Feature Breakdown, and a Style Elements section.
 
-**Example Input:**
-create a Modern website for travel agency with a Navbar, Herosection , services ,about us , contact us,footer . Clean, minimalist design with generous white space Smooth scroll animations and transitions Premium glassmorphism effects for nav and cards Subtle hover animations on interactive elements High-quality travel imagery with blur loading Responsive layout for all screen sizes Features for this first version: Elegant navbar with glass effect and smooth transitions Hero section with a stunning travel background and compelling CTA Services section showcasing travel packages with hover effects About us section with a modern layout Contact form with clean design Premium footer with useful links Style Elements: Font: "Inter" for clean, modern typography Colors: Soft neutrals with accent colors Animations: Subtle fade-ins and hover effects Shadows: Soft, natural shadows for depth
-
-
-**Example Output:**
-graph LR
-    subgraph User
-        A[User Input: I want a simple product page with a form to add a product 
- name, price, category and a display area showing the product details after saving.]
-    end
-
-    subgraph Core_Agents[Core Agents]
-        AAA[Description Agent]
-        AA[Requirement Understanding Agent]
-        AB[Page Structure Analysis Agent]
-        B[User Interface Requirements Agent]
-        C[UI Component Selection Agent Tailwind-Specific]
-        D[Component Structure Agent]
-        E[Code Generation Agent Next.js/Tailwind]
-        F[Reviewer Agent]
-    end
-
-    subgraph System
-        G[Next.js Project Template]
-        H[Validation Logic/Tooling]
-    end
-
-    subgraph Output
-        J[Description Agent Output]
-        I[React Code JSON]
-        K[Reviewer Agent Output Errors]
-        L[Sandpack/CodeSandbox]
-        M[Working UI]
-    end
-
-   
 `
 
 export let uiRequirementAgent = 
@@ -727,6 +691,8 @@ You are a highly skilled Code Generation Agent, now with expertise in generating
  <rules>  
 - Use **React** with functional components and hooks (\`useState\`, \`useEffect\`, etc.).  
 - Use **Recharts** for all charts and visualizations.  
+- Use **Unsplash Images** for images wherever it needed. make sure to get relatable images for the content or for website. https://api.unsplash.com/search/photos?client_id=JcQnYrLOXoM_7tSwaEuVHpabqboG1rZHOzfOx9YZh4U&query={query}
+
 
 ### **Concise Layout & Design Principles (Tailwind CSS)**
 

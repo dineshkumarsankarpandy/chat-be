@@ -198,10 +198,9 @@ export class AgentModelService {
   async runAgent(
     agentName: string,
     
-    agentPrompt: string,
+    agentPrompt?: string,
     userInput?: string | object,
-    model: string = "o3-mini-2025-01-31",
-    systemPromptAddition?: string
+    useJson: boolean = true
   ): Promise<string> {
     try {
       const userInputStr = typeof userInput === "object" ? JSON.stringify(userInput) : userInput;
@@ -210,21 +209,32 @@ export class AgentModelService {
         { role: "user", content: userInputStr },
       ];
 
-      const completion = await this.openai.chat.completions.create({
-        model,
-        messages,
-        response_format: { type: "json_object" }
-      });
 
+     const requestOptions: any = {
+      model: "o3-mini-2025-01-31",
+      messages
+    };
+
+    if (useJson) {
+      requestOptions.response_format = { type: "json_object" };
+    }
+
+    const completion = await this.openai.chat.completions.create(requestOptions);
       const response = completion.choices[0].message.content;
-      if (!response) return JSON.stringify({ error: `Agent ${agentName} returned an empty response.` });
-
-      try {
-        JSON.parse(response);
-      } catch (e: any) {
-        return JSON.stringify({ error: `Agent ${agentName} returned invalid JSON: ${e.message}`, raw_response: response });
+      if (!response)
+        return JSON.stringify({ error: `Agent ${agentName} returned an empty response.` });
+  
+      if (useJson) {
+        try {
+          JSON.parse(response);
+        } catch (e: any) {
+          return JSON.stringify({
+            error: `Agent ${agentName} returned invalid JSON: ${e.message}`,
+            raw_response: response,
+          });
+        }
       }
-
+  
       return response;
     } catch (e: any) {
       return JSON.stringify({ error: `Agent ${agentName} failed: ${e.message}` });
@@ -391,105 +401,44 @@ export class AgentModelService {
 
  
 
-// async generatedAgenticResponse(data: CreateAgentModelDto){
-
-// try{
-
-
-    
-
-//   const uiRequirementsJson = await this.runAgent(
-//     "User Interface Requirements Agent",
-//     userRequirementAgent,
-//     data.prompt
-//   );
-
-//   if (this.helperService.isAgentError(uiRequirementsJson)) {
-//     return JSON.stringify({ error: `User Interface Requirements Agent failed: ${uiRequirementsJson.error}` });
-//   }
-
-//   console.log(uiRequirementsJson, "UIREQUIREMENTS");
-  
-
-//   const uiComponentMappingJson = await this.runAgent(
-//     "UI Components Selection Agent",
-//     userComponentSelectionAgent,
-//     uiRequirementsJson
-//   );
-//   console.log(uiComponentMappingJson, "UI CONPONENT REQUIREMENTS");
-
-//   if (this.helperService.isAgentError(uiComponentMappingJson)) {
-//     return JSON.stringify({ error: `User Components Selection Agent failed: ${uiComponentMappingJson.error}` });
-//   }
-
-//   const componentStrucutredJson = await this.runAgent(
-//     "Components Structure Agent",
-//     componentStrucutreAgent,
-//     uiComponentMappingJson
-//   );
-//   console.log(componentStrucutredJson, "component structure json");
-
-
-//   if (this.helperService.isAgentError(componentStrucutredJson)) {
-//     return JSON.stringify({ error: `UI Components structured Agent failed: ${componentStrucutredJson.error}` });
-//   }
-
-//   // const dataGenerationJson = await this.runAgent(
-//   //   "Data Generation Agent Prompt",
-//   //   dataGenerationAgent,
-//   //   componentStrucutredJson
-//   // );
-//   // console.log(dataGenerationJson, "Data Generation Agent Prompt");
-
-
-//   // if (this.helperService.isAgentError(dataGenerationJson)) {
-//   //   return JSON.stringify({ error: `UI Components structured Agent failed: ${dataGenerationJson.error}` });
-//   // }
-
-
-//   const generatedCodeJson = await this.runAgent(
-//     "Code Generation Agent",
-//     codeGenerationAgent,
-//     {componentStrucutredJson,uiComponentMappingJson},
-//     systemPrompt
-//   );
- 
-//   if (this.helperService.isAgentError(generatedCodeJson)) {
-//     return JSON.stringify({ error: ` Code Generating Agent failed: ${generatedCodeJson.error}` });
-//   }
-
-
-// const parsedContent = JSON.parse(generatedCodeJson)
-
-
-//   return {
-//     uiRequirementsJson: uiRequirementsJson,
-//     uiComponentMappingJson: uiComponentMappingJson,
-//     componentStrucutredJson: componentStrucutredJson,
-//     code: parsedContent.code,
-//     otherResponse: parsedContent.otherResponse,
-    
-//   };
-// }
-// catch(err){
-//   console.log(err, "ERROR");
-  
-// }
-
-// }
-
 async generatedAgenticResponse(data: CreateAgentModelDto){
+
+
+
+  let getPromptDescription = `
+### **Frontend UI & Layout Requirement Assistant**  
+
+#### **<OBJECTIVE_AND_PERSONA>**  
+You are a **Frontend UI/UX Specialist Assistant**. Your task is to understand the ${data.prompt} and generate a **Frontend Layout & UI Specification Document**, detailing the website’s structure, page components, and UI styling.
+
+---
+
+### **<INSTRUCTIONS>**  
+To complete the task, follow these steps:  
+1. **Understand Page Structure** – Identify the key pages and their purpose.  
+2. **Define Layout & Information Hierarchy** – Organize content sections logically.  
+3. **Specify UI Components & Interactions** – Define buttons, cards, modals, etc.  
+4. **Create a User Flow Diagram** – Show how users navigate through the site.  
+5. **Provide a Design Brief** – Specify styles, colors, typography, and spacing.  
+6. **Ensure Responsiveness** – Define how the layout adapts for desktop, tablet, and mobile views.  
+7. **Charts** - Suggest to use recharts library
+      
+      `;
 
   try{
 
 
     const userDescriptionJson = await this.runAgent(
         "User Prompt Description Agent",
-        userDescriptionPrompt,
+        // userDescriptionPrompt,
+        getPromptDescription,
         data.prompt,
-        
+        false
+      );
 
-    )
+
+    console.log(userDescriptionJson, "USER DESCRIPTION");
+    
     const RequirementsUnderstandJson = await this.runAgent(
       "User Interface Requirements Agent",
       uiRequirementAgent,
@@ -501,6 +450,8 @@ async generatedAgenticResponse(data: CreateAgentModelDto){
     }
 
     console.log(RequirementsUnderstandJson, "UIREQUIREMENTS");
+
+
 
 
 
@@ -559,51 +510,6 @@ async generatedAgenticResponse(data: CreateAgentModelDto){
     const parsedContent = JSON.parse(generatedCodeJson)
 
     
-
-
-    // const uiComponentMappingJson = await this.runAgent(
-    //   "UI Components Selection Agent",
-    //   userComponentSelectionAgent,
-    //   uiRequirementsJson,
-    //   "gpt-4o-mini",
-    //   systemPrompt // Pass the systemPrompt here
-    // );
-    // console.log(uiComponentMappingJson, "UI CONPONENT REQUIREMENTS");
-
-    // if (this.helperService.isAgentError(uiComponentMappingJson)) {
-    //   return JSON.stringify({ error: `User Components Selection Agent failed: ${uiComponentMappingJson.error}` });
-    // }
-
-    // const componentStrucutredJson = await this.runAgent(
-    //   "Components Structure Agent",
-    //   componentStrucutreAgent,
-    //   uiComponentMappingJson,
-    //   "gpt-4o-mini",
-    //   systemPrompt  // Pass the systemPrompt here
-    // );
-    // console.log(componentStrucutredJson, "component structure json");
-
-
-    // if (this.helperService.isAgentError(componentStrucutredJson)) {
-    //   return JSON.stringify({ error: `UI Components structured Agent failed: ${componentStrucutredJson.error}` });
-    // }
-
-    // const generatedCodeJson = await this.runAgent(
-    //   "Code Generation Agent",
-    //   codeGenerationAgent,
-    //   {componentStrucutredJson,uiComponentMappingJson},
-    //   "gpt-4o-mini",
-    //   systemPrompt  // Pass the systemPrompt here
-    // );
-
-    // if (this.helperService.isAgentError(generatedCodeJson)) {
-    //   return JSON.stringify({ error: ` Code Generating Agent failed: ${generatedCodeJson.error}` });
-    // }
-
-
-    // const parsedContent = JSON.parse(generatedCodeJson)
-
-
     return {
       code : parsedContent.code,
       otherResponse : parsedContent.otherResponse
