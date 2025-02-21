@@ -9,7 +9,7 @@ import { CreateAgentModelDto } from './dto/create-agent-model.dto';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { HelperService } from 'src/core/helper/helper.service';
 import { log } from 'util';
-import { codeGenerationAgent, pageStructurePrompt,  userComponentSelectionAgent,  uiRequirementAgent, componentStrucutreAgent } from 'src/prompt/agentsPrompts';
+import { codeGenerationAgent, pageStructurePrompt,  userComponentSelectionAgent,  uiRequirementAgent, componentStrucutreAgent, userDescriptionPrompt } from 'src/prompt/agentsPrompts';
 import { json } from 'express';
 
 
@@ -482,11 +482,18 @@ async generatedAgenticResponse(data: CreateAgentModelDto){
 
   try{
 
+
+    const userDescriptionJson = await this.runAgent(
+        "User Prompt Description Agent",
+        userDescriptionPrompt,
+        data.prompt,
+        
+
+    )
     const RequirementsUnderstandJson = await this.runAgent(
       "User Interface Requirements Agent",
       uiRequirementAgent,
-      data.prompt,
-      "gpt-4o-mini",
+      userDescriptionJson
     );
 
     if (this.helperService.isAgentError(RequirementsUnderstandJson)) {
