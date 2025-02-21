@@ -46,9 +46,8 @@ export let task  = `
 `
 
 
+let task1 = `
 
-
-```
 I want to create professional services app that connects service provides and people looking for services.
 the name of my project is \"bydaygigs\" - all small letters. 
 
@@ -123,9 +122,7 @@ An App Where Service Providers Interface with Potential Customers\n
 5. Conclusion:
 This application aims to provide a seamless and secure way for customers to find reliable service providers while ensuring fair compensation and
 trust through secure payments and verification systems.The goal is to create an efficient marketplace for local services, improving convenience and job opportunities.
-```
 
-```
 build a micro saas that converts technical documentation of programming technologies into json files that preserved all the info including code snippets.
 the goal of these files is to add them as context into coding editors with llm so that the latest code documentation can be referenced.
 the user can can feed a url to the website and then a scraper will scrape all the data from the documentation, including following links.
@@ -133,11 +130,7 @@ the app needs to be connected to google gemini api to evaluate the data, whcih l
 that is ideal for llm's to understand so that it is the most useful to feed ai code editors.
 
 the doc will then be stored.
-```
 
-
-
-```
 Here's the **refined and fully integrated version** of the AI-powered **Smart Device Management App** with all your requested 
 
 **advanced features**:  \n\n---\n\n
@@ -153,9 +146,78 @@ Here's the **refined and fully integrated version** of the AI-powered **Smart De
 
 
 
-```
 
-```
 copei em esse site para mim e faça em python  - Copy from this site for me and make it in Python.
 
-```
+
+ Hi Lovable Team,
+    
+    I need help building a simple app that integrates with my Monday CRM to streamline sending requests for estimates to multiple suppliers. Below are the requirements and functionality details:
+    
+    Overview:
+    The app's core concept is to quickly send a material list request to all suppliers in a specific group from my Monday CRM. For example, if a contractor needs an estimate for CertainTeed siding, the app will automatically send the material list to all 25 suppliers associated with CertainTeed in NJ in our CRM. This increases the chances of getting multiple estimates and helps save money.
+    
+    User Flow:
+    Landing & Sign-In Pages:
+    - Landing Page: A brief introduction to the app.
+    - Sign-In Page: Allows users to create an account or log in.
+    
+    User Dashboard:
+    - After signing in, users are redirected to a Dashboard.
+    - Dashboard Interface: Contains a simple form with two main input options:
+        - Product Selection: A dropdown or selection field where the user chooses the product they need a quote for (e.g., 'CertainTeed Siding'). This selection is used to determine the supplier group from the Monday CRM.
+        - Material List Input: A text box where the user pastes the full material list or additional details.
+    - Submit Button: Once clicked, the request is submitted and the user is redirected back to their Dashboard where they can view their recently submitted request.
+    
+    Admin Integration with Monday CRM:
+    - On the backend, the app will connect with Monday CRM.
+    - For each submitted request:
+        - The product selection is used to identify the relevant supplier group (e.g., all suppliers tied to CertainTeed in NJ).
+        - The entire material list is then sent automatically to all suppliers in that group (e.g., 25 suppliers).
+    - The admin interface (or notification system) should display the submitted request details, including the selected product and material list.
+    
+    Additional Considerations:
+    - Design & User Experience: The app should have a clean and simple design to ensure ease of use.
+    - Scalability: While the initial focus is on a basic version (landing, sign-in, dashboard, and admin integration), please structure the app in a way that future enhancements can be added easily.
+    - Error Handling: Ensure that if there is an issue with sending requests (e.g., CRM integration failure), both the user and admin are notified appropriately.
+    - Security: Ensure that user data and CRM integrations are secure.
+    
+    Please let me know if you need any additional details or clarifications to get started. Thank you!
+
+Hi Lovable Team,
+I need help building a simple app that integrates with my Monday CRM to streamline sending requests for estimates to multiple suppliers.
+Below are the requirements and functionality details:
+Overview:
+The app's core concept is to quickly send a material list request to all suppliers in a specific group from my Monday CRM.
+For example, if a contractor needs an estimate for CertainTeed siding, the app will automatically send the material list to all 25 suppliers associated with CertainTeed in NJ in our CRM. This increases the chances of getting multiple estimates and helps save money.
+    User Flow:
+    Landing & Sign-In Pages:
+    Landing Page: A brief introduction to the app.
+    Sign-In Page: Allows users to create an account or log in.
+User Dashboard:
+After signing in, users are redirected to a Dashboard.
+Dashboard Interface: Contains a simple form with two main input options:
+Product Selection: A dropdown or selection field where the user chooses the product they need a quote for (e.g., 'CertainTeed Siding'). This selection is used to determine the supplier group from the Monday CRM.
+Material List Input: A text box where the user pastes the full material list or additional details.
+Submit Button: Once clicked, the request is submitted and the user is redirected back to their Dashboard where they can view their recently submitted request.
+
+Admin Integration with Monday CRM:
+On the backend, the app will connect with Monday CRM.
+For each submitted request:
+The product selection is used to identify the relevant supplier group (e.g., all suppliers tied to CertainTeed in NJ).
+The entire material list is then sent automatically to all suppliers in that group (e.g., 25 suppliers).
+The admin interface (or notification system) should display the submitted request details, including the selected product and material list.
+
+Additional Considerations:
+Design & User Experience: The app should have a clean and simple design to ensure ease of use.
+Scalability: While the initial focus is on a basic version (landing, sign-in, dashboard, and admin integration), please structure the app in a way that future enhancements can be added easily.
+Error Handling: Ensure that if there is an issue with sending requests (e.g., CRM integration failure), both the user and admin are notified appropriately.
+Security: Ensure that user data and CRM integrations are secure.
+
+Please let me know if you need any additional details or clarifications to get started. Thank you!""")
+
+
+
+"## Product requirements\n- The user is building a SaaS platform named \"Planaris\" for standardized construction materials.\n- The platform includes:\n  - A landing page with a welcome message \"Le damos la bienvenida a Planaris\" and a bilingual materials table.\n  - CRUD functionalities for managing customer entities (Nombre Cliente, Dirección, Teléfono, Email, Nombre contacto principal, CUIT / CUIL).\n  - Backend connected to Supabase with Google account authentication.\n  - A navigation bar with links to \"Proyectos,\" \"Clientes,\" and \"Mi Perfil.\"\n  - CRUD functionality for managing \"Projects\" (Nombre del proyecto, Locación, Cliente).\n  - A \"Presupuesto\" action in the Projects table to initiate construction quotes, with a new \"Presupuestos\" page summarizing project and client information.\n  - An editable \"Tareas / Actividades\" table on the Presupuesto page for managing tasks.\n  - Management of \"Materiales\" and \"Mano de obra\" entities with independent editable tables on the Presupuesto page, including specific columns and calculations.\n  - Inline editing capabilities and notifications for the Materiales and Mano de obra tables.\n  - A \"Vista previa\" button on the Presupuesto page to open a print preview of the budget, including project and client details, and a unified table of tasks with associated materials and labor.\n  - A redesigned task table in the Print Preview to show a unified list of Materials and Labor grouped by tasks, with specific columns and a calculated total.\n  - Print and Share buttons in the print preview header, with the Share button allowing sending the preview as a PDF via email, pre-filling recipient and title fields.\n  - An email sharing form that allows users to modify the recipient's email and the email title before sending.\n  - A Supabase Edge Function for sending emails using Resend.\n  - A refactored PrintPreviewDialog component into smaller components for better maintainability.\n  - A refactored ProjectForm component into smaller components for better maintainability, including separate files for form fields and form logic.\n  - Proper type definitions and error handling in the ProjectForm component to ensure compliance with Supabase schema requirements.\n  - The Print and Share buttons have been moved inside the Print Preview dialog instead of being on the Presupuesto page.\n  - The \"Vista previa\" button is aligned to the right of the screen.\n  - A properly configured Edge Function for sending PDFs with correct CORS headers and error handling.\n  - The configuration for Supabase Edge Functions has been updated to remove invalid keys.\n  - Implementation of a model for converting the application into a SaaS platform, including subscription plans, user roles, multi-tenancy, and billing considerations.\n\n## Current goals\nThe user is focused on finalizing the implementation of the \"Planaris\" platform. They have set up the landing page, customer management, and project management functionalities. Currently, the user is enhancing the Presupuesto page, which includes an editable tasks table and tables for managing materials and labor costs. They have implemented a print preview feature that displays project and client information along with a detailed task list, redesigned to show a unified list of materials and labor grouped by tasks with calculated totals. The user is also working on adding print and share functionality to the print preview, including email sharing capabilities. Additionally, the user has refactored the code for better maintainability, specifically breaking down the PrintPreviewDialog and ProjectForm components into smaller, more manageable components. The user has resolved TypeScript errors related to the ProjectForm component by ensuring proper type definitions and handling of required fields. Recently, they have moved the print and share buttons to the Print Preview dialog and aligned the preview button to the right of the screen. The user is also addressing issues with the Supabase Edge Function for sending PDFs, ensuring it is properly set up and deployed, and has successfully added the Resend API key for email functionality. The user is currently troubleshooting deployment errors related to the Supabase Edge Function configuration and has made adjustments to the configuration file to resolve these issues. Furthermore, the user is seeking guidance on converting the application into a SaaS platform, considering aspects such as subscription models, user roles, multi-tenancy, and billing."
+
+`

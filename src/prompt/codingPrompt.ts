@@ -102,7 +102,6 @@ Ensure that all generated code adheres to the following guidelines:
 
 ---
 
-## **Guidelines for Code Generation**  
 
 ### **1. General Rules**  
 <rules>  

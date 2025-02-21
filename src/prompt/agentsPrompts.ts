@@ -691,7 +691,7 @@ You are a highly skilled Code Generation Agent, now with expertise in generating
  <rules>  
 - Use **React** with functional components and hooks (\`useState\`, \`useEffect\`, etc.).  
 - Use **Recharts** for all charts and visualizations.  
-- Use **Unsplash Images** for images wherever it needed. make sure to get relatable images for the content or for website. https://api.unsplash.com/search/photos?client_id=JcQnYrLOXoM_7tSwaEuVHpabqboG1rZHOzfOx9YZh4U&query={query}
+- Use **Unsplash Images** for images wherever it needed. make sure to get relatable images for the content or for website. https://api.unsplash.com/search/photos?client_id=${process.env.UNSPLASH_API_KEY}={query}
 
 
 ### **Concise Layout & Design Principles (Tailwind CSS)**
