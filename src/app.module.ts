@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { AgentModelModule } from './agent-model/agent-model.module';
+import { GithubModule } from './github/github.module';
 
 @Module({
   imports: [
@@ -15,7 +16,8 @@ import { AgentModelModule } from './agent-model/agent-model.module';
 
 
     AuthModule,
-    AgentModelModule
+    AgentModelModule,
+    GithubModule
 
   ],
   controllers: [AppController],
